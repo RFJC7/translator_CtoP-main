@@ -1,5 +1,5 @@
 import re
-from AST import AST_InternalNode, AST_LeafNode
+from AST1 import AST_InternalNode, AST_LeafNode
 from yacc import parser as parser
 from pre_process import pre_process_file, formatIndent
 import os
@@ -48,11 +48,11 @@ class Translator:
         #     print(item.key)
         #     if(isinstance(item, AST_LeafNode)):
         #         print(item.value)
+
         code_list = []
         # 处理所有子节点
         # 1.处理声明，函数声明与全局变量声明两种情况
         self.declarations = reversed(self.declarations)
-        self.functions = reversed(self.functions)
         for declaration in self.declarations:
             if self.is_function_declaration(declaration):
                 continue
@@ -87,8 +87,6 @@ class Translator:
             return ['False']
         elif tree.value == 'struct':
             return ['class']
-        # elif tree.value == '(' or tree.value == ')':
-        #     return ['']
         else:
             return [tree.value]
 
@@ -125,17 +123,12 @@ class Translator:
         for child in tree.children:
             # print(child.key)
             if child.key == 'ID':
-                child.value = 'global_'+child.value
                 self.global_variables.append(child.value)
             else:
                 self.extract_global_declaration(child)
 
     # 判断是否是函数声明
     def is_function_declaration(self, tree):
-        # print("tree:    ", tree, "    key:    ",
-        #       tree.key, "     type:   ", type(tree))
-        if isinstance(tree, AST_LeafNode):
-            return False
         for child in tree.children:
             if isinstance(child, AST_LeafNode):
                 return False
@@ -148,8 +141,6 @@ class Translator:
             else:
                 if self.is_function_declaration(child):
                     return True
-                else:
-                    return False
         return False
 
     def translate(self, input_file_path, output_file_path):
@@ -159,10 +150,8 @@ class Translator:
             if not success:
                 print(file_content)
                 return
-            print("预编译成功")
             # 解析得到语法树
             tree = parser.parse(file_content)
-            print("语法树生成成功")
             print(tree)
             # 语义处理
             raw_outcome = self.process(tree)
@@ -182,27 +171,23 @@ class Translator:
     # 翻译函数
     def code_compose(self, tree, code_list):
         # 变量声明
-        # if tree.key == 'identifier':
-        #     print("identifier")
-        #     print("tree:    "+str(tree)+"   type:   ", type(tree))
-        #     if len(tree.children) != 1:
-        #         return ''
-        #     else:
-        #         tmp = str(tree.children[0])
-        #         print("tmp: ", tmp)
-        #         while(True):
-        #             if(tmp[0] == "(" and tmp[-1] == ")"):
-        #                 tmp = str(tmp[2:-2])
-        #             else:
-        #                 break
-        #         result = tmp
-        #         for child in tree.children[1:]:
-        #             result += str(child)
-        #         print("result", result)
-        #         print()
-        #         return result
-        # 函数声明
-        if tree.key == 'function_definition':
+        if tree.key == 'init_declarator':
+            print("init_declarator")
+            print("tree:    "+str(tree))
+            tmp = str(tree.children[0])
+            while(True):
+                if(tmp[0] == "(" and tmp[-1] == ")"):
+                    tmp = str(tmp[2:-2])
+                else:
+                    break
+            result = tmp
+            for child in tree.children[1:]:
+                result += str(child)
+            print("result", result)
+            print()
+            return result
+         # 函数声明
+        elif tree.key == 'function_definition':
             print("function_definition")
             print("tree:    "+str(tree))
             if len(tree.children) == 4:
@@ -243,144 +228,19 @@ class Translator:
                 print("result:  "+str(result))
                 print()
                 return result
-        # 数组的声明与定义，如：
-        # int s[10]; == > s = [None] * 10
-        # int s[5] = {1,2,3}; ==>  s = [1,2,3,0,0]
-        # char s[5] = "abc"; ==>  s = ['a','b','c',0,0]
-        elif tree.key == 'direct_declarator_forlist':
-            result = [code_list[0][0] + '=[' + 'None' + ']*' + code_list[2][0]]
-            print(result)
-            """
-            数组名 = [None] * 长度
-            """
-            return result
-
-        elif tree.key == 'init_declarator' and len(tree.children) == 3:
-            print(code_list[0])
-            print(code_list[1])
-            print(code_list[2])
-            print("begin")
-            tmp = code_list[0][0]  # s[0]*5
-            print(tmp)
-            index_1 = tmp.find('[')
-            left = tmp[:index_1 - 1]  # s
-            print(left)
-            length = code_list[0][0].split('*')[1]  # 5
-
-            # 字符数组 "..."初始化
-            if code_list[2][0].find('"') >= 0:
-                tmp = code_list[2][0].strip('"')  # "abc"
-                result = [left + '=[None]*' + length]
-                for i, c in enumerate(tmp):
-                    result.append(left + '[' + str(i) + ']="' + c + '"')
-                """
-                数组名 = [None] * 长度
-                数组名[0] = 初始值1 ("字符")
-                数组名[1] = 初始值2
-                ...
-                """
-                return result
-
-            # 其他类型的数组 {...}初始化
-            else:
-                tmp = code_list[2][0].split(',')
-                result = [left + '=[None]*' + length]
-                for i, c in enumerate(tmp):
-                    result.append(left + '[' + str(i) + ']=' + c)
-                """
-                数组名 = [None] * 长度
-                数组名[0] = 初始值1
-                数组名[1] = 初始值2
-                ...
-                """
-                return result
-
-        # ++a
-        elif tree.key == 'unary_expression_v' and isinstance(tree.children[0], AST_LeafNode):
-            if tree.children[0].value == '++':
-                result = [code_list[1][0] + ' = ' + code_list[1][0] + '+1']
-                return result
-            if tree.children[0].value == '--':
-                result = [code_list[1][0] + '=' + code_list[1][0] + '-1']
-                return result
-
-        # a--
-        elif tree.key == 'postfix_expression_v' and len(tree.children) == 2:
-            if tree.children[1].value == '--':
-                result = [code_list[0][0] + '=' + code_list[0][0] + '-1']
-                return result
-            if tree.children[1].value == '++':
-                result = [code_list[0][0] + '=' + code_list[0][0] + '+1']
-                return result
         # 去除{}
         elif tree.key == 'compound_statement':
             if len(tree.children) == 3:
-                return code_list[1]
-            elif len(tree.children) == 2:
-                return ['pass']
-        # 单行多个声明进行分行
-        elif tree.key == 'init_declarator_list':
-            if len(tree.children) == 1:
-                return code_list[0]
-            else:
-                return [code_list[0][0],
-                        code_list[2][0]]
-        # 循环语句
-        elif tree.key == 'iteration_statement':
-            print("iteration_statement")
-            print("tree:   ", tree, "    key:    ", tree.key)
-            print(len(tree.children))
-            # 1.
-            #  for(...;...;...){
-            #    ...
-            #  }
-            if len(tree.children) == 7:
                 """
-                初始条件
-                while 终止条件:
                     代码块（缩进+1）
-                    迭代（缩进+1）
                 """
-                return [code_list[2][0], 'while ' + code_list[3][0] + ':', code_list[6], code_list[4]]
-            #  2.
-            #     while(...){
-            #     ...
-            #     }
-            elif(tree.children[0].value == 'while'):
-                return ['while ' + code_list[2][0] + ':', code_list[4]]
-            return [""]
-        # 选择语句
-        elif tree.key == 'selection_statement':
-            print("selection_statement")
-            print("tree:    "+str(tree))
-            # 1.
-            # if(...){
-            #     ...
-            # }
-            if(len(tree.children) == 5):
-                return ['if '+code_list[2][0]+":", code_list[4]]
-            # 2.
-            # if(...){
-            #     ...
-            # }
-            # else{
-            #    ...
-            # }
-            if(len(tree.children) == 7):
-                return ['if '+code_list[2][0]+":", code_list[4], 'else:', code_list[6]]
-
-        # 语句块的换行
-        elif tree.key == 'block_item_list':
-            lst = []
-            for code in code_list:
-                for c in code:
-                    lst.append(c)
-            """
-            语句1
-            语句2
-            ...
-            """
-            return lst
+                return code_list[1]
+            # {}内为空，Python需要有 pass
+            elif len(tree.children) == 2:
+                """
+                    pass（缩进+1）
+                """
+                return ['pass']
         # 去除类型名
         elif tree.key == 'declaration_specifiers':
             return ''
@@ -394,7 +254,7 @@ class Translator:
                 s = ''
                 for code in code_list:
                     s += code[0]
-                lst.append(s)
+                lst.extend(s)
             else:
                 for code in code_list:
                     lst.extend(code)

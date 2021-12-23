@@ -5,36 +5,48 @@ from AST import AST_InternalNode
 from AST import AST_LeafNode
 
 # 开始节点 -> 全局声明列表
+
+
 def p_start_node(p):
     ''' start_node : start_node global_declaration
                          |  global_declaration'''
     p[0] = AST_InternalNode('start_node', p[1:])
 
 # 全局声明 -> 函数定义 | 变量 or 函数声明
+
+
 def p_global_declaration(p):
     ''' global_declaration : function_definition
                              | declaration  '''
     p[0] = AST_InternalNode('global_declaration', p[1:])
 
 # 变量声明 -> 声明修饰符(extern 等); / 声明修饰符 + 声明列表;
+
+
 def p_declaration(p):
     ''' declaration : declaration_specifiers ';'
                     | declaration_specifiers init_declarator_list ';' '''
     p[0] = AST_InternalNode('declaration', p[1:])
 
 # 声明列表 -> 逗号分隔的声明
+
+
 def p_init_declarator_list(p):
     ''' init_declarator_list : init_declarator
                              | init_declarator_list ',' init_declarator '''
     p[0] = AST_InternalNode('init_declarator_list', p[1:])
 
 # 声明 -> 只声明变量 | 声明时赋值
+
+
 def p_init_declarator(p):
     ''' init_declarator : declarator
                         | declarator '=' initializer '''
     p[0] = AST_InternalNode('init_declarator', p[1:])
 
 # 声明修饰符 -> 存储类型 | 函数 | 类型 修饰符列表
+
+
 def p_declaration_specifiers(p):
     ''' declaration_specifiers 	: storage_class_specifier declaration_specifiers_no_s
                                 | type_specifier
@@ -43,6 +55,8 @@ def p_declaration_specifiers(p):
     p[0] = AST_InternalNode('declaration_specifiers', p[1:])
 
 # 不能定义多个存储类型
+
+
 def p_declaration_specifiers_no_s(p):
     ''' declaration_specifiers_no_s : type_specifier
                                 | type_specifier declaration_specifiers_no_ts_s
@@ -50,6 +64,8 @@ def p_declaration_specifiers_no_s(p):
     p[0] = AST_InternalNode('declaration_specifiers', p[1:])
 
 # 不能定义多个变量类型, 且必须有一个
+
+
 def p_declaration_specifiers_no_ts(p):
     ''' declaration_specifiers_no_ts : storage_class_specifier
                                 | storage_class_specifier declaration_specifiers_no_ts_s
@@ -58,12 +74,16 @@ def p_declaration_specifiers_no_ts(p):
     p[0] = AST_InternalNode('declaration_specifiers', p[1:])
 
 # 见上, 可以定义多个类型限定符
+
+
 def p_declaration_specifiers_no_ts_s(p):
     ''' declaration_specifiers_no_ts_s : type_qualifier
                                 | type_qualifier declaration_specifiers_no_ts_s'''
     p[0] = AST_InternalNode('declaration_specifiers', p[1:])
 
 # 储存修饰符
+
+
 def p_storage_class_specifier(p):
     ''' storage_class_specifier : TYPEDEF
                                 | EXTERN
@@ -73,6 +93,8 @@ def p_storage_class_specifier(p):
     p[0] = AST_InternalNode('storage_class_specifier', p[1:])
 
 # 类型修饰符, 简化版本实现， 修饰符只能放在一起。
+
+
 def p_type_specifier(p):
     ''' type_specifier : VOID
                        | CHAR
@@ -111,6 +133,8 @@ def p_type_specifier(p):
     p[0] = AST_InternalNode('type_specifier', p[1:])
 
 # 类型限定符，vs实测不支持Restrict，因此略过
+
+
 def p_type_qualifier(p):
     ''' type_qualifier : CONST
                        | VOLATILE
@@ -118,6 +142,8 @@ def p_type_qualifier(p):
     p[0] = AST_InternalNode('type_qualifier', p[1:])
 
 # 枚举类型
+
+
 def p_enum_specifier(p):
     ''' enum_specifier : ENUM '{' enumerator_list '}'
                         | ENUM identifier '{' enumerator_list '}'
@@ -127,18 +153,24 @@ def p_enum_specifier(p):
     p[0] = AST_InternalNode('enum_specifier', p[1:])
 
 # 枚举类型  枚举项列表
+
+
 def p_enumerator_list(p):
     ''' enumerator_list : enumerator
                         | enumerator_list ',' enumerator '''
     p[0] = AST_InternalNode('enumerator_list', p[1:])
 
 # 枚举类型  枚举项
+
+
 def p_enumerator(p):
     ''' enumerator : identifier
                    | identifier '=' constant_expression '''
     p[0] = AST_InternalNode('enumerator', p[1:])
 
 # 结构体，联合类型定义
+
+
 def p_struct_or_union_specifier(p):
     ''' struct_or_union_specifier : struct_or_union identifier '{' struct_declaration_list '}'
                                   | struct_or_union '{' struct_declaration_list '}'
@@ -146,23 +178,31 @@ def p_struct_or_union_specifier(p):
     p[0] = AST_InternalNode('struct_or_union_specifier', p[1:])
 
 # struct和union关键字
+
+
 def p_struct_or_union(p):
     ''' struct_or_union : STRUCT
                         | UNION '''
     p[0] = AST_InternalNode('struct_or_union', p[1:])
 
 # 结构体或联合类型中的成员变量
+
+
 def p_struct_declaration_list(p):
     ''' struct_declaration_list : struct_declaration
                                 | struct_declaration_list struct_declaration '''
     p[0] = AST_InternalNode('struct_declaration_list', p[1:])
 
 # 结构体或联合的单个成员变量
+
+
 def p_struct_declaration(p):
     ''' struct_declaration : specifier_qualifier_list struct_declarator_list ';' '''
     p[0] = AST_InternalNode('struct_declaration', p[1:])
 
 # 类型标识符和类型限定符列表
+
+
 def p_specifier_qualifier_list(p):
     ''' specifier_qualifier_list : type_specifier specifier_qualifier_list_no_ts
                                  | type_specifier
@@ -171,18 +211,24 @@ def p_specifier_qualifier_list(p):
     p[0] = AST_InternalNode('specifier_qualifier_list', p[1:])
 
 # 不能定义多个变量类型
+
+
 def p_specifier_qualifier_list_no_ts(p):
     ''' specifier_qualifier_list_no_ts : type_qualifier specifier_qualifier_list_no_ts
                                         | type_qualifier  '''
     p[0] = AST_InternalNode('specifier_qualifier_list', p[1:])
 
 # 某个类型的多个标识符
+
+
 def p_struct_declarator_list(p):
     ''' struct_declarator_list : struct_declarator
                                | struct_declarator_list ',' struct_declarator '''
     p[0] = AST_InternalNode('struct_declarator_list', p[1:])
 
 # 单个成员变量
+
+
 def p_struct_declarator(p):
     ''' struct_declarator : declarator
                           | ':' constant_expression
@@ -190,12 +236,16 @@ def p_struct_declarator(p):
     p[0] = AST_InternalNode('struct_declarator', p[1:])
 
 # 单个成员变量
+
+
 def p_declarator(p):
     ''' declarator : pointer direct_declarator
                    | direct_declarator '''
     p[0] = AST_InternalNode('declarator', p[1:])
 
 # 指针类型
+
+
 def p_pointer(p):
     ''' pointer : '*'
                 | '*' type_qualifier_list
@@ -204,12 +254,16 @@ def p_pointer(p):
     p[0] = AST_InternalNode('pointer', p[1:])
 
 # 类型限定符列表
+
+
 def p_type_qualifier_list(p):
     ''' type_qualifier_list : type_qualifier
                             | type_qualifier_list type_qualifier '''
     p[0] = AST_InternalNode('type_qualifier_list', p[1:])
 
 # 直接声明
+
+
 def p_direct_declarator(p):
     ''' direct_declarator : direct_declarator_forlist
                         | '(' declarator ')'
@@ -217,6 +271,8 @@ def p_direct_declarator(p):
     p[0] = AST_InternalNode('direct_declarator', p[1:])
 
 # 直接声明
+
+
 def p_direct_declarator_forlist(p):
     ''' direct_declarator_forlist : identifier
                                 | '(' pointer direct_declarator_forlist ')'
@@ -224,11 +280,11 @@ def p_direct_declarator_forlist(p):
                                 | direct_declarator_forlist '[' constant_expression ']'
                                 | identifier '[' constant_expression ']'
                                 | identifier '[' ']' '''
-    if len(p) == 2 or (len(p) == 4 and p[2] == '['):
-        p[1] = AST_LeafNode('identifier', p[1])
     p[0] = AST_InternalNode('direct_declarator_forlist', p[1:])
 
 # 函数参数 列表
+
+
 def p_parameter_list(p):
     ''' parameter_list : parameter_list_definition
                        | parameter_declaration
@@ -244,47 +300,63 @@ def p_parameter_declaration(p):
     p[0] = AST_InternalNode('parameter_declaration', p[1:])
 
 # 纯常量表达式
+
+
 def p_constant_expression(p):
     ''' constant_expression : conditional_expression '''
     p[0] = AST_InternalNode('constant_expression', p[1:])
 
 # 条件表达式
+
+
 def p_conditional_expression(p):
     ''' conditional_expression : logical_or_expression
                                | logical_or_expression '?' expression ':' conditional_expression '''
     p[0] = AST_InternalNode('conditional_expression', p[1:])
 
 # 逻辑 or 表达式
+
+
 def p_logical_or_expression(p):
     ''' logical_or_expression : logical_and_expression
                               | logical_or_expression OR logical_and_expression '''
     p[0] = AST_InternalNode('logical_or_expression', p[1:])
 
 # 逻辑 and 表达式
+
+
 def p_logical_and_expression(p):
     ''' logical_and_expression : inclusive_or_expression
                                | logical_and_expression AND inclusive_or_expression '''
     p[0] = AST_InternalNode('logical_and_expression', p[1:])
 
 # 或运算表达式（或运算）
+
+
 def p_inclusive_or_expression(p):
     ''' inclusive_or_expression : exclusive_or_expression
                                 | inclusive_or_expression '|' exclusive_or_expression '''
     p[0] = AST_InternalNode('inclusive_or_expression', p[1:])
 
 # 异或运算表达式（异或运算）
+
+
 def p_exclusive_or_expression(p):
     ''' exclusive_or_expression : and_expression
                                 | exclusive_or_expression '^' and_expression '''
     p[0] = AST_InternalNode('exclusive_or_expression', p[1:])
 
 # 与运算表达式（与运算）
+
+
 def p_and_expression(p):
     ''' and_expression : equality_expression
                        | and_expression '&' equality_expression '''
     p[0] = AST_InternalNode('and_expression', p[1:])
 
 # 等值判断表达式（相等、不等）
+
+
 def p_equality_expression(p):
     ''' equality_expression : relational_expression
                             | equality_expression EQUAL relational_expression
@@ -292,6 +364,8 @@ def p_equality_expression(p):
     p[0] = AST_InternalNode('equality_expression', p[1:])
 
 # 关系表达式（大于、小于、大于等于、小于等于）
+
+
 def p_relational_expression(p):
     ''' relational_expression : shift_expression
                               | relational_expression '<' shift_expression
@@ -301,6 +375,8 @@ def p_relational_expression(p):
     p[0] = AST_InternalNode('relational_expression', p[1:])
 
 # 位移表达式（左移、右移）
+
+
 def p_shift_expression(p):
     ''' shift_expression : additive_expression
                          | shift_expression SHIFT_LEFT additive_expression
@@ -308,6 +384,8 @@ def p_shift_expression(p):
     p[0] = AST_InternalNode('shift_expression', p[1:])
 
 # 加法表达式（加减）
+
+
 def p_additive_expression(p):
     ''' additive_expression : multiplicative_expression
                             | additive_expression '+' multiplicative_expression
@@ -315,6 +393,8 @@ def p_additive_expression(p):
     p[0] = AST_InternalNode('additive_expression', p[1:])
 
 # 乘法表达式（乘除模）
+
+
 def p_multiplicative_expression(p):
     ''' multiplicative_expression : cast_expression
                                   | multiplicative_expression '*' cast_expression
@@ -323,20 +403,45 @@ def p_multiplicative_expression(p):
     p[0] = AST_InternalNode('multiplicative_expression', p[1:])
 
 # 类型转化表达式
+
+
 def p_cast_expression(p):
     ''' cast_expression : unary_expression
-                        | '(' specifier_qualifier_list ')' cast_expression '''
+                        | '(' type_name ')' cast_expression '''
     p[0] = AST_InternalNode('cast_expression', p[1:])
 
+# 类型名
+
+
+def p_type_name(p):
+    ''' type_name : specifier_qualifier_list
+                  | specifier_qualifier_list brace_pointer '''
+    p[0] = AST_InternalNode('type_name', p[1:])
+
+# 可带括号的指针
+
+
+def p_brace_pointer(p):
+    ''' brace_pointer : '*'
+                | '*' type_qualifier_list
+                | '(' brace_pointer ')'
+                | '*' brace_pointer
+                | '*' type_qualifier_list brace_pointer '''
+    p[0] = AST_InternalNode('brace_pointer', p[1:])
+
 # 一元表达式
+
+
 def p_unary_expression(p):
     ''' unary_expression : primary_expression
                          | unary_operator cast_expression
                          | SIZEOF unary_expression
-                         | SIZEOF '(' specifier_qualifier_list ')' '''
+                         | SIZEOF '(' type_name ')' '''
     p[0] = AST_InternalNode('unary_expression', p[1:])
 
 # 一元运算符(常量)
+
+
 def p_unary_operator(p):
     ''' unary_operator : '+'
                        | '-'
@@ -345,6 +450,8 @@ def p_unary_operator(p):
     p[0] = AST_InternalNode('unary_operator', p[1:])
 
 # 主要表达式(无变量)
+
+
 def p_primary_expression(p):
     ''' primary_expression : CONSTANCE
                            | STRING_LITERAL
@@ -352,12 +459,16 @@ def p_primary_expression(p):
     p[0] = AST_InternalNode('primary_expression', p[1:])
 
 # 表达式(常量)
+
+
 def p_expression(p):
     ''' expression : constant_expression
                    | expression ',' constant_expression '''
     p[0] = AST_InternalNode('expression', p[1:])
 
 # 抽象声明
+
+
 def p_abstract_declarator(p):
     ''' abstract_declarator : pointer
                             | direct_abstract_declarator
@@ -365,6 +476,8 @@ def p_abstract_declarator(p):
     p[0] = AST_InternalNode('abstract_declarator', p[1:])
 
 # 直接抽象声明
+
+
 def p_direct_abstract_declarator(p):
     ''' direct_abstract_declarator : '(' abstract_declarator ')'
                                    | '[' ']'
@@ -376,24 +489,33 @@ def p_direct_abstract_declarator(p):
 # 书签=================================
 
 # 函数定义。这里指针内部不支持括号
+
+
 def p_function_definition(p):
     ''' function_definition : declaration_specifiers pointer direct_function_declarator compound_statement
                             | declaration_specifiers direct_function_declarator compound_statement '''
     p[0] = AST_InternalNode('function_definition', p[1:])
 
 # 直接声明
+
+
 def p_direct_function_declarator(p):
-    ''' direct_function_declarator : '(' direct_function_declarator ')'
+    ''' direct_function_declarator :  '(' pointer direct_function_declarator ')'
+                                    | '(' direct_function_declarator ')'
                                     | identifier parameter_type_list_definition '''
     p[0] = AST_InternalNode('direct_function_declarator', p[1:])
+
 
 def p_identifier(p):
     ''' identifier : '(' identifier ')'
                     | ID '''
     if p[1] != '(':
         p[1] = AST_LeafNode('ID', p[1])
+    p[0] = AST_InternalNode('identifier', p[1:])
 
 # 函数参数 列表（定义时）
+
+
 def p_parameter_type_list_definition(p):
     ''' parameter_type_list_definition : '(' ')'
                                        | '(' parameter_type_list_definition ')'
@@ -401,6 +523,8 @@ def p_parameter_type_list_definition(p):
     p[0] = AST_InternalNode('parameter_type_list_definition', p[1:])
 
 # 函数参数 列表（定义时）
+
+
 def p_parameter_list_definition(p):
     ''' parameter_list_definition : parameter_declaration '=' constant_expression  ',' parameter_list_definition
                                   | parameter_declaration '=' constant_expression 
@@ -430,6 +554,8 @@ def p_block_item(p):
 
 # 语句
 # 推导 -> 标记语句（labeled_statement）|
+
+
 def p_statement(p):
     ''' statement : labeled_statement
                   | compound_statement
@@ -440,29 +566,39 @@ def p_statement(p):
     p[0] = AST_InternalNode('statement', p[1:])
 
 # 标记语句
+
+
 def p_labeled_statement(p):
     ''' labeled_statement : identifier ':' '''
     p[0] = AST_InternalNode('labeled_statement', p[1:])
 
 # 表达式语句
+
+
 def p_expression_statement(p):
     ''' expression_statement : ';'
                              | expression_variable ';' '''
     p[0] = AST_InternalNode('expression_statement', p[1:])
 
 # 表达式（含变量）
+
+
 def p_expression_variable(p):
     ''' expression_variable : assignment_expression
                             | expression_variable ',' assignment_expression '''
     p[0] = AST_InternalNode('expression', p[1:])
 
 # 赋值表达式
+
+
 def p_assignment_expression(p):
     ''' assignment_expression : conditional_expression_v
                               | unary_expression_v assignment_operator assignment_expression '''
     p[0] = AST_InternalNode('assignment_expression', p[1:])
 
 # 赋值运算符
+
+
 def p_assignment_operator(p):
     ''' assignment_operator : '='
                             | AO_MUL
@@ -478,6 +614,8 @@ def p_assignment_operator(p):
     p[0] = AST_InternalNode('assignment_operator', p[1:])
 
 # 条件表达式
+
+
 def p_conditional_expression_v(p):
     ''' conditional_expression_v : logical_or_expression_v
                                | logical_or_expression_v '?' expression_variable ':' conditional_expression_v '''
@@ -566,17 +704,21 @@ def p_multiplicative_expression_v(p):
 def p_cast_expression_v(p):
     ''' cast_expression_v : unary_expression_v
                         | unary_expression_v_constance
-                        | '(' specifier_qualifier_list ')' cast_expression_v '''
+                        | '(' type_name ')' cast_expression_v '''
     p[0] = AST_InternalNode('cast_expression_v', p[1:])
 
 # 一元表达式常数版
+
+
 def p_unary_expression_v_constance(p):
     ''' unary_expression_v_constance : primary_expression_v
                          | SIZEOF unary_expression_v_constance
-                         | SIZEOF '(' specifier_qualifier_list ')' '''
+                         | SIZEOF '(' type_name ')' '''
     p[0] = AST_InternalNode('unary_expression_v', p[1:])
 
 # 一元表达式变量版
+
+
 def p_unary_expression_v(p):
     ''' unary_expression_v : postfix_expression_v
                          | INC unary_expression_v
@@ -613,6 +755,8 @@ def p_postfix_expression_v(p):
     p[0] = AST_InternalNode('postfix_expression_v', p[1:])
 
 # 实测函数返回值不支持后置++和--，前置仍然支持
+
+
 def p_postfix_expression_v_no_func(p):
     ''' postfix_expression_v_no_func : identifier
                                 | '(' postfix_expression_v_no_func ')'
@@ -624,6 +768,8 @@ def p_postfix_expression_v_no_func(p):
     p[0] = AST_InternalNode('postfix_expression_v_no_func', p[1:])
 
 # 主要表达式, 处理非ID的情况
+
+
 def p_primary_expression_v(p):
     ''' primary_expression_v : CONSTANCE
                            | STRING_LITERAL
@@ -631,13 +777,26 @@ def p_primary_expression_v(p):
     p[0] = AST_InternalNode('primary_expression_v', p[1:])
 
 # 选择语句
+
+
 def p_selection_statement(p):
     ''' selection_statement : IF '(' expression_variable ')' statement ELSE statement
                             | IF '(' expression_variable ')' statement
                             | SWITCH '(' expression_variable ')' statement_switch '''
     p[0] = AST_InternalNode('selection_statement', p[1:])
 
+# 选择语句
+
+
+def p_selection_statement_while(p):
+    ''' selection_statement_while : IF '(' expression_variable ')' statement_while ELSE statement_while
+                            | IF '(' expression_variable ')' statement_while
+                            | SWITCH '(' expression_variable ')' statement_while_switch '''
+    p[0] = AST_InternalNode('selection_statement', p[1:])
+
 # 复合语句（代码块）
+
+
 def p_compound_statement_switch(p):
     ''' compound_statement_switch : '{' '}'
                            | '{' block_item_list_switch '}' '''
@@ -648,27 +807,31 @@ def p_compound_statement_switch(p):
 def p_block_item_list_switch(p):
     ''' block_item_list_switch : block_item_switch
                         | block_item_list_switch block_item_switch '''
-    p[0] = AST_InternalNode('block_item_list_switch', p[1:])
+    p[0] = AST_InternalNode('block_item_list', p[1:])
 
 
 # 代码块元素
 def p_block_item_switch(p):
     ''' block_item_switch : declaration
                    | statement_switch '''
-    p[0] = AST_InternalNode('block_item_switch', p[1:])
+    p[0] = AST_InternalNode('block_item', p[1:])
 
 # 语句
 # 推导 -> 标记语句（labeled_statement）|
+
+
 def p_statement_switch(p):
     ''' statement_switch : labeled_statement_switch
                         | compound_statement_switch
                         | expression_statement
                         | selection_statement
-                        | iteration_statement
+                        | iteration_statement_switch
                         | jump_statement '''
     p[0] = AST_InternalNode('statement', p[1:])
 
 # 标记语句，不支持ID带括号
+
+
 def p_labeled_statement_switch(p):
     ''' labeled_statement_switch : ID ':'
                             | CASE constant_expression ':' statement
@@ -677,36 +840,135 @@ def p_labeled_statement_switch(p):
         p[1] = AST_LeafNode('ID', p[1])
     p[0] = AST_InternalNode('labeled_statement', p[1:])
 
+# 复合语句（代码块）
+
+
+def p_compound_statement_while(p):
+    ''' compound_statement_while : '{' '}'
+                           | '{' block_item_list_while '}' '''
+    p[0] = AST_InternalNode('compound_statement', p[1:])
+
+
+# 代码块元素 列表
+def p_block_item_list_while(p):
+    ''' block_item_list_while : block_item_while
+                        | block_item_list_while block_item_while '''
+    p[0] = AST_InternalNode('block_item_list', p[1:])
+
+
+# 代码块元素
+def p_block_item_while(p):
+    ''' block_item_while : declaration
+                   | statement_while '''
+    p[0] = AST_InternalNode('block_item', p[1:])
+
+# 语句
+# 推导 -> 标记语句（labeled_statement）|
+
+
+def p_statement_while(p):
+    ''' statement_while : labeled_statement
+                        | compound_statement_while
+                        | expression_statement
+                        | selection_statement_while
+                        | iteration_statement
+                        | jump_statement_while '''
+    p[0] = AST_InternalNode('statement', p[1:])
+
 # 循环语句
+
+
 def p_iteration_statement(p):
-    ''' iteration_statement : WHILE '(' expression_variable ')' statement
-                            | DO statement WHILE '(' expression_variable ')' ';'
-                            | FOR '(' expression_statement expression_statement ')' statement
-                            | FOR '(' expression_statement expression_statement expression_variable ')' statement
-                            | FOR '(' declaration expression_statement ')' statement
-                            | FOR '(' declaration expression_statement expression_variable ')' statement '''
+    ''' iteration_statement : WHILE '(' expression_variable ')' statement_while
+                            | DO statement_while WHILE '(' expression_variable ')' ';'
+                            | FOR '(' expression_statement expression_statement ')' statement_while
+                            | FOR '(' expression_statement expression_statement expression_variable ')' statement_while
+                            | FOR '(' declaration expression_statement ')' statement_while
+                            | FOR '(' declaration expression_statement expression_variable ')' statement_while '''
     p[0] = AST_InternalNode('iteration_statement', p[1:])
 
+# 循环语句
+
+
+def p_iteration_statement_switch(p):
+    ''' iteration_statement_switch : WHILE '(' expression_variable ')' statement_while_switch
+                            | DO statement_while_switch WHILE '(' expression_variable ')' ';'
+                            | FOR '(' expression_statement expression_statement ')' statement_while_switch
+                            | FOR '(' expression_statement expression_statement expression_variable ')' statement_while_switch
+                            | FOR '(' declaration expression_statement ')' statement_while_switch
+                            | FOR '(' declaration expression_statement expression_variable ')' statement_while_switch '''
+    p[0] = AST_InternalNode('iteration_statement', p[1:])
+
+# 复合语句（代码块）
+
+
+def p_compound_statement_while_switch(p):
+    ''' compound_statement_while_switch : '{' '}'
+                           | '{' block_item_list_while_switch '}' '''
+    p[0] = AST_InternalNode('compound_statement', p[1:])
+
+
+# 代码块元素 列表
+def p_block_item_list_while_switch(p):
+    ''' block_item_list_while_switch : block_item_while_switch
+                        | block_item_list_while_switch block_item_while_switch '''
+    p[0] = AST_InternalNode('block_item_list', p[1:])
+
+
+# 代码块元素
+def p_block_item_while_switch(p):
+    ''' block_item_while_switch : declaration
+                                | statement_while_switch '''
+    p[0] = AST_InternalNode('block_item', p[1:])
+
+# 语句
+# 推导 -> 标记语句（labeled_statement）|
+
+
+def p_statement_while_switch(p):
+    ''' statement_while_switch : labeled_statement_switch
+                        | compound_statement_while_switch
+                        | expression_statement
+                        | selection_statement_while
+                        | iteration_statement_switch
+                        | jump_statement_while '''
+    p[0] = AST_InternalNode('statement', p[1:])
+
 # 跳转语句，不支持ID带括号
+
+
 def p_jump_statement(p):
     ''' jump_statement : GOTO ID ';'
-                       | CONTINUE ';'
-                       | BREAK ';'
                        | RETURN ';'
                        | RETURN expression_variable ';' '''
     if len(p) == 4 and p[1] == 'goto':
         p[2] = AST_LeafNode('ID', p[2])
     p[0] = AST_InternalNode('jump_statement', p[1:])
 
+# 跳转语句while版，不支持ID带括号
+
+
+def p_jump_statement_while(p):
+    ''' jump_statement_while : GOTO ID ';'
+                            | CONTINUE ';'
+                            | BREAK ';'
+                            | RETURN ';'
+                            | RETURN expression_variable ';' '''
+    if len(p) == 4 and p[1] == 'goto':
+        p[2] = AST_LeafNode('ID', p[2])
+    p[0] = AST_InternalNode('jump_statement', p[1:])
 
 # 暂时放着不管
 # 初始化 列表
 
 # 实参表达式 列表
+
+
 def p_argument_expression_list(p):
     ''' argument_expression_list : assignment_expression
                                  | argument_expression_list ',' assignment_expression '''
     p[0] = AST_InternalNode('argument_expression_list', p[1:])
+
 
 def p_initializer_list(p):
     ''' initializer_list : initializer
@@ -746,8 +1008,12 @@ def p_designator(p):
     p[0] = AST_InternalNode('designator', p[1:])
 
 # 语法分析  错误处理
+
+
 def p_error(p):
-    print('[Error]: type - %s, value - %s, lineno - %d, lexpos - %d' % (p.type, p.value, p.lineno, p.lexpos))
+    print('[Error]: type - %s, value - %s, lineno - %d, lexpos - %d' %
+          (p.type, p.value, p.lineno, p.lexpos))
+
 
 parser = yacc.yacc()
 
@@ -758,6 +1024,6 @@ if __name__ == '__main__':
             s = input('yacc > ')
             with open(s, 'r') as file:
                 result = parser.parse(file.read())
-                print("result=\n",result)
+                print("result=\n", result)
         except EOFError:
             break

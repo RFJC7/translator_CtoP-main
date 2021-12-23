@@ -6,8 +6,10 @@ class AST_Node():
     """
     key属性描述了这个节点的变量，如果它是叶子节点，则有value
     """
+
     def __init__(self, key):
         self.key = key
+
 
 class AST_LeafNode(AST_Node):
     """
@@ -15,12 +17,14 @@ class AST_LeafNode(AST_Node):
     key     : String, 表示变量名称
     value   : String, 表示终结符
     """
+
     def __init__(self, key, value):
         self.key = str(key)
         self.value = str(value)
-    
+
     def __str__(self):
         return self.value
+
 
 class AST_InternalNode(AST_Node):
     """
@@ -28,19 +32,22 @@ class AST_InternalNode(AST_Node):
     key     : String, 表示变量名称
     children : List<AST_Node> 描述了语法分析树的树形结构
     """
-    def __init__(self, key, childen):
+
+    def __init__(self, key, children):
         self.key = str(key)
-        self.childen = childen
-        for i in range(len(self.childen)):
-            if not isinstance(self.childen[i],AST_Node):
-                self.childen[i] = AST_LeafNode(key=str(self.childen[i]),value=str(self.childen[i]))
-    
+        self.children = children
+        for i in range(len(self.children)):
+            if not isinstance(self.children[i], AST_Node):
+                self.children[i] = AST_LeafNode(
+                    key=str(self.children[i]), value=str(self.children[i]))
+
     def __str__(self):
         result = self.key + "["
-        for i in range(len(self.childen)-1):
-            result += str(self.childen[i]) + ","
-        result += str(self.childen[-1]) + "]"
+        for i in range(len(self.children)-1):
+            result += str(self.children[i]) + ","
+        result += str(self.children[-1]) + "]"
         return result
+
 
 # 用于测试
 if __name__ == '__main__':
@@ -53,14 +60,13 @@ if __name__ == '__main__':
     结果：expr[expr[a],+,expr[b]]
     """
     root = AST_InternalNode("expr", [])
-    left = AST_InternalNode("expr",[])
-    mid = AST_LeafNode("+","+")
-    right = AST_InternalNode("expr",[])
-    a = AST_LeafNode("a","a")
-    b = AST_LeafNode("b","b")
+    left = AST_InternalNode("expr", [])
+    mid = AST_LeafNode("+", "+")
+    right = AST_InternalNode("expr", [])
+    a = AST_LeafNode("a", "a")
+    b = AST_LeafNode("b", "b")
 
-    root.childen = [left, mid, right]
-    left.childen = [a]
-    right.childen = [b]
+    root.children = [left, mid, right]
+    left.children = [a]
+    right.children = [b]
     print(root)
-    

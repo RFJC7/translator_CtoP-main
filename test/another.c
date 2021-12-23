@@ -1,6 +1,2 @@
-int main()
-{
-    int a = 0;
-    a = 1;
-    return 0;
-}
+
+int las[10] = {1, 2};
